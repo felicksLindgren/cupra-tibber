@@ -2,7 +2,7 @@ name: Scheduled Cupra Tibber Sync
 
 on:
   schedule:
-    - cron: '1 * * * *' # every hour
+    - cron: '0 * * * *' # every hour
   push:
     paths:
       - main.sh
