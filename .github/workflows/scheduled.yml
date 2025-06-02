@@ -16,6 +16,8 @@ jobs:
       CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
       REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
       TOKEN_ENDPOINT: ${{ secrets.TOKEN_ENDPOINT }}
+      TIBBER_EMAIL: ${{ secrets.TIBBER_EMAIL }}
+      TIBBER_PASSWORD: ${{ secrets.TIBBER_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - name: Run sync script
