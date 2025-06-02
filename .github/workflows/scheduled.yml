@@ -3,6 +3,7 @@ name: Scheduled Cupra Tibber Sync
 on:
   schedule:
     - cron: '0 * * * *' # every hour
+  workflow_dispatch: # allows manual triggering of the workflow
 
 jobs:
   sync:
