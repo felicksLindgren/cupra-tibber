@@ -8,12 +8,6 @@ REFRESH_TOKEN="$REFRESH_TOKEN"
 TIBBER_EMAIL="$TIBBER_EMAIL"
 TIBBER_PASSWORD="$TIBBER_PASSWORD"
 
-# Check if required environment variables are set
-if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$TOKEN_ENDPOINT" ] || [ -z "$REFRESH_TOKEN" ] || [ -z "$TIBBER_EMAIL" ] || [ -z "$TIBBER_PASSWORD" ]; then
-  echo "One or more required environment variables are not set."
-  exit 1
-fi
-
 # Request a new access token using the refresh token
 response=$(curl -s -X POST "$TOKEN_ENDPOINT" \
   -H "Content-Type: application/x-www-form-urlencoded" \
