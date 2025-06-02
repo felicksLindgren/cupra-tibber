@@ -10,11 +10,5 @@ response=$(curl -s -X POST "$ACCESS_TOKEN_URL" \
   -d "client_secret=$CLIENT_SECRET" \
   -d "refresh_token=$REFRESH_TOKEN")
 
-access_token=$(echo "$response" | jq -r '.access_token')
+echo $response | jq
 
-if [ "$access_token" == "null" ]; then
-  echo "Failed to refresh access token. Response: $response"
-  exit 1
-else
-  echo "Access token refreshed successfully: $access_token"
-fi
