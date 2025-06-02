@@ -42,7 +42,55 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
 
 3. **Workflow runs automatically** every hour and on relevant file changes.
 
+## Obtaining a Refresh Token
+
+- The easiest way to obtain a `refresh_token` is by using an API client like **Postman** or **Bruno**.  
+  These applications allow you to perform the OAuth2 authorization code flow using your browser, making it straightforward to retrieve the refresh token.
+- This is a one-time setup:  
+  Once you have a `refresh_token`, it is valid for approximately 4000 hours (~5.5 months).
+- The script will automatically use the refresh token to obtain new access tokens on each run.
+
 ## Security
 
 - Secrets are never exposed in logs or code.
 - GitHub Actions does **not** expose secrets to workflows triggered by pull requests from forks.
+
+## Limitations
+
+- The refresh token is valid for approximately 4000 hours (~5.5 months).  
+  After this period, you will need to obtain a new refresh token.
+  - This will be fixed in the future by implementing a refresh token rotation mechanism.
+
+```bash
+# filepath: [main.sh](http://_vscodecontentref_/0)
+# ...existing code...
+
+# Extract new refresh_token if present in the response
+new_refresh_token=$(echo "$response" | jq -r '.refresh_token')
+
+if [ "$new_refresh_token" != "null" ] && [ -n "$GH_PAT" ]; then
+  echo "Updating GitHub secret REFRESH_TOKEN..."
+
+  # Get repo info (set these as env vars or hardcode)
+  REPO_OWNER="felixlindgren"
+  REPO_NAME="cupra-tibber"
+
+  # Get public key for secrets
+  pubkey_response=$(curl -s -H "Authorization: token $GH_PAT" \
+    "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/public-key")
+
+  key_id=$(echo "$pubkey_response" | jq -r '.key_id')
+  public_key=$(echo "$pubkey_response" | jq -r '.key')
+
+  # Encrypt the new refresh token
+  encrypted_value=$(echo -n "$new_refresh_token" | \
+    openssl rsautl -encrypt -pubin -inkey <(echo "$public_key" | base64 -d) | base64 | tr -d '\n')
+
+  # Update the secret
+  curl -s -X PUT -H "Authorization: token $GH_PAT" \
+    -H "Content-Type: application/json" \
+    -d "{\"encrypted_value\":\"$encrypted_value\",\"key_id\":\"$key_id\"}" \
+    "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/REFRESH_TOKEN"
+fi
+# ...existing code...
+```
