@@ -59,7 +59,9 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
 
 - The refresh token is valid for approximately 4000 hours (~5.5 months).  
   After this period, you will need to obtain a new refresh token.
-  - This will be fixed in the future by implementing a refresh token rotation mechanism.
+
+This will be fixed in the future by implementing the following refresh token rotation mechanism.
+The script will automatically update the GitHub secret `REFRESH_TOKEN` with the new refresh token obtained from the VW Group API, ensuring that the script continues to function without manual intervention.
 
 ```bash
 # filepath: [main.sh](http://_vscodecontentref_/0)
