@@ -22,7 +22,7 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
 ### `main.sh`
 
 - **Purpose:**  
-  Authenticates with the VW Group API using OAuth2 refresh tokens, fetches the current state of charge for a specific Cupra vehicle, then logs in to Tibber and updates the battery level via Tibber's API.
+  Authenticates with the VW Group API using OAuth2 refresh tokens, fetches the current state of charge for a specific Cupra vehicle, then logs in to Tibber and updates the battery level via Tibber's API. It also securely rotates the GitHub Actions secret for the refresh token.
 - **Secrets:**  
   All credentials and tokens are securely loaded from environment variables, which should be set as [GitHub Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
 - **Steps:**
@@ -30,6 +30,7 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
   2. Fetches the vehicle's current state of charge.
   3. Logs in to Tibber using provided credentials.
   4. Sends the state of charge to Tibber via a GraphQL mutation.
+  5. Rotates the `REFRESH_TOKEN` GitHub secret using the latest refresh token.
 
 ### `.github/workflows/scheduled.yml`
 
@@ -49,9 +50,10 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
    - `CLIENT_ID`
    - `CLIENT_SECRET`
    - `REFRESH_TOKEN`
-   - `TOKEN_ENDPOINT`
    - `TIBBER_EMAIL`
    - `TIBBER_PASSWORD`
+   - `GH_PAT` (Personal Access Token with repo access)
+   - `VIN` (Your vehicle's VIN)
 
 2. **Modify vehicle and home IDs** in `main.sh` if needed.
 
@@ -64,12 +66,15 @@ The `main.sh` script uses several `curl` commands to interact with external APIs
 ### 1. Obtain a New VW Group Access Token
 
 ```bash
-response=$(curl -s -X POST "$TOKEN_ENDPOINT" \
+token_response=$(curl -s -X POST https://identity.vwgroup.io/oidc/v1/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=refresh_token" \
   -d "client_id=$CLIENT_ID" \
   -d "client_secret=$CLIENT_SECRET" \
   -d "refresh_token=$REFRESH_TOKEN")
+
+vw_access_token=$(echo "$token_response" | jq -r '.access_token')
+new_refresh_token=$(echo "$token_response" | jq -r '.refresh_token')
 ```
 
 **Purpose:**  
@@ -78,7 +83,7 @@ This request exchanges your long-lived `refresh_token` for a new, short-lived ac
 - **Endpoint:** The VW Group OAuth2 token endpoint.
 - **Headers:** Sets the content type for form data.
 - **Data:** Supplies the client credentials and refresh token.
-- **Response:** Contains a new access token (and possibly a new refresh token).
+- **Response:** Contains a new access token and a new refresh token.
 
 ---
 
@@ -144,14 +149,14 @@ Sends the latest state of charge to Tibber using a GraphQL mutation.
 
 ```bash
 # Get public key for secrets
-pubkey_response=$(curl -s -L \
+github_pubkey_response=$(curl -s -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer $GH_PAT" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/public-key")
 
-key_id=$(echo "$pubkey_response" | jq -r '.key_id')
-public_key=$(echo "$pubkey_response" | jq -r '.key')
+key_id=$(echo "$github_pubkey_response" | jq -r '.key_id')
+public_key=$(echo "$github_pubkey_response" | jq -r '.key')
 
 # Encrypt the new refresh token using the public key
 encrypted_value=$(python3 scripts/encrypt.py "$public_key" "$new_refresh_token")
