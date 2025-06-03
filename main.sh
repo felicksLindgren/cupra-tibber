@@ -2,6 +2,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+REPO_OWNER="felicksLindgren"
+REPO_NAME="cupra-tibber"
 HOME_ID="3d7d05f5-d547-4db2-9499-0188825a7cfc"
 VEHICLE_ID="3901c6b5-76de-4e1c-90b3-1cfcbcbf5fef"
 
