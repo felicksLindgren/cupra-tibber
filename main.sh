@@ -24,32 +24,32 @@ if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$TOKEN_ENDPOINT" ] ||
 fi
 
 # Request a new access token using the refresh token
-response=$(curl -s -X POST "$TOKEN_ENDPOINT" \
+token_respone=$(curl -s -X POST "$TOKEN_ENDPOINT" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=refresh_token" \
   -d "client_id=$CLIENT_ID" \
   -d "client_secret=$CLIENT_SECRET" \
   -d "refresh_token=$REFRESH_TOKEN")
 
-vw_access_token=$(echo "$response" | jq -r '.access_token')
+vw_access_token=$(echo "$token_respone" | jq -r '.access_token')
 
 if [ "$vw_access_token" == "null" ]; then
-  echo "Failed to refresh access token. Response: $response"
+  echo "Failed to refresh access token. Response: $token_respone"
   exit 1
 else
   echo "Access token refreshed successfully."
 fi
 
-new_refresh_token=$(echo "$response" | jq -r '.refresh_token')
+new_refresh_token=$(echo "$token_respone" | jq -r '.refresh_token')
 
 if [ "$new_refresh_token" == "null" ]; then
-  echo "Failed to retrieve refresh token. Response: $response"
+  echo "Failed to retrieve refresh token. Response: $token_respone"
   exit 1
 else
   echo "Refresh token retrieved successfully."
 fi
 
-pubkey_response=$(curl -L \
+pubkey_response=$(curl -s -L \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer $GH_PAT" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -57,6 +57,13 @@ pubkey_response=$(curl -L \
 
 key_id=$(echo "$pubkey_response" | jq -r '.key_id')
 public_key=$(echo "$pubkey_response" | jq -r '.key')
+
+if [ "$key_id" == "null" ] || [ "$public_key" == "null" ]; then
+  echo "Failed to retrieve public key. Response: $pubkey_response"
+  exit 1
+else
+  echo "Public key retrieved successfully."
+fi
 
 encrypted_value=$((python3 scripts/encrypt.py "$public_key" "$new_refresh_token") 2>/dev/null)
 
@@ -67,12 +74,15 @@ else
   echo "Refresh token encrypted successfully."
 fi
 
-if [ "$key_id" == "null" ] || [ "$public_key" == "null" ]; then
-  echo "Failed to retrieve public key. Response: $pubkey_response"
-  exit 1
-else
-  echo "Public key retrieved successfully."
-fi
+curl -s -L -X PUT \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization Bearer $GH_PAT" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/REFRESH_TOKEN" \
+  -d "{
+    \"encrypted_value\": \"$encrypted_value\",
+    \"key_id\": \"$key_id\"
+  }"
 
 # Fetch state of charge from Cupra API
 state_of_charge=$(curl -s https://ola.prod.code.seat.cloud.vwgroup.com/v1/vehicles/$VIN/charging/status \
