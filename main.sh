@@ -65,7 +65,7 @@ else
   echo "Public key retrieved successfully."
 fi
 
-encrypted_value=$((python3 scripts/encrypt.py "$public_key" "$new_refresh_token") 2>/dev/null)
+encrypted_value=$(python3 scripts/encrypt.py "$public_key" "$new_refresh_token" 2>/dev/null)
 
 if [ "$encrypted_value" == "null" ]; then
   echo "Failed to encrypt the refresh token."
@@ -74,7 +74,7 @@ else
   echo "Refresh token encrypted successfully."
 fi
 
-curl -s -L -X PUT \
+put_response=$(curl -s -L -X PUT \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization Bearer $GH_PAT" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -82,7 +82,15 @@ curl -s -L -X PUT \
   -d "{
     \"encrypted_value\": \"$encrypted_value\",
     \"key_id\": \"$key_id\"
-  }"
+  }")
+
+# Check for "201 Created" status code
+if [ "$(echo "$put_response" | jq -r '.status')" != "201" ]; then
+  echo "Failed to update the refresh token in GitHub Secrets. Response: $put_response"
+  exit 1
+else
+  echo "Refresh token updated successfully in GitHub Secrets."
+fi
 
 # Fetch state of charge from Cupra API
 state_of_charge=$(curl -s https://ola.prod.code.seat.cloud.vwgroup.com/v1/vehicles/$VIN/charging/status \
