@@ -2,6 +2,22 @@
 
 This repository contains a Bash script and a GitHub Actions workflow to automate fetching the state of charge (SoC) from a Cupra vehicle (via VW Group API) and sending it to Tibber.
 
+## Table of Contents
+
+- [Contents](#contents)
+  - [main.sh](#mainsh)
+  - [.github/workflows/scheduled.yml](#githubworkflowsscheduledyml)
+- [Setup](#setup)
+- [Curl Requests Explained](#curl-requests-explained)
+  - [1. Obtain a New VW Group Access Token](#1-obtain-a-new-vw-group-access-token)
+  - [2. Fetch State of Charge from Cupra API](#2-fetch-state-of-charge-from-cupra-api)
+  - [3. Authenticate with Tibber](#3-authenticate-with-tibber)
+  - [4. Update Battery Level in Tibber](#4-update-battery-level-in-tibber)
+  - [5. (Planned) Update the GitHub Secret `REFRESH_TOKEN`](#5-planned-update-the-github-secret-refresh_token)
+- [Obtaining a Refresh Token](#obtaining-a-refresh-token)
+- [Security](#security)
+- [Limitations](#limitations)
+
 ## Contents
 
 ### `main.sh`
