@@ -76,12 +76,19 @@ fi
 
 echo "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/REFRESH_TOKEN"
 
-curl -L -X PUT \
+put_response=$(curl -L -X PUT \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer $GH_PAT" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/REFRESH_TOKEN" \
-  -d "{ \"encrypted_value\": \"$encrypted_value\", \"key_id\": \"$key_id\" }"
+  -d "{ \"encrypted_value\": \"$encrypted_value\", \"key_id\": \"$key_id\" }")
+
+if [ "$(echo "$put_response" | jq -r '.message')" == "null" ]; then
+  echo "Refresh token updated successfully in GitHub repository."
+else
+  echo "Failed to update refresh token in GitHub repository. Response: $put_response"
+  exit 1
+fi
 
 # Fetch state of charge from Cupra API
 state_of_charge=$(curl -s https://ola.prod.code.seat.cloud.vwgroup.com/v1/vehicles/$VIN/charging/status \
