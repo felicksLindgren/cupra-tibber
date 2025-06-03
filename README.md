@@ -13,10 +13,9 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
   - [2. Fetch State of Charge from Cupra API](#2-fetch-state-of-charge-from-cupra-api)
   - [3. Authenticate with Tibber](#3-authenticate-with-tibber)
   - [4. Update Battery Level in Tibber](#4-update-battery-level-in-tibber)
-  - [5. (Planned) Update the GitHub Secret `REFRESH_TOKEN`](#5-planned-update-the-github-secret-refresh_token)
+  - [5. (Planned) Update the GitHub Secret `REFRESH_TOKEN`](#5-update-the-github-secret-refresh_token)
 - [Obtaining a Refresh Token](#obtaining-a-refresh-token)
 - [Security](#security)
-- [Limitations](#limitations)
 
 ## Contents
 
@@ -141,21 +140,41 @@ Sends the latest state of charge to Tibber using a GraphQL mutation.
 
 ---
 
-### 5. (Planned) Update the GitHub Secret `REFRESH_TOKEN`
+### 5. Update the GitHub Secret `REFRESH_TOKEN`
 
 ```bash
 # Get public key for secrets
-pubkey_response=$(curl -s -H "Authorization: token $GH_PAT" \
+pubkey_response=$(curl -s -L \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_PAT" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
   "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/public-key")
-# ... (encryption and update steps follow)
+
+key_id=$(echo "$pubkey_response" | jq -r '.key_id')
+public_key=$(echo "$pubkey_response" | jq -r '.key')
+
+# Encrypt the new refresh token using the public key
+encrypted_value=$(python3 scripts/encrypt.py "$public_key" "$new_refresh_token")
+
+# Update the secret in the repository
+curl -s -L -X PUT \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer $GH_PAT" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/REFRESH_TOKEN" \
+  -d "{ \"encrypted_value\": \"$encrypted_value\", \"key_id\": \"$key_id\" }"
 ```
 
 **Purpose:**  
-Fetches the repository’s public key to encrypt and update the `REFRESH_TOKEN` secret via the GitHub API.
+Fetches the repository’s public key, encrypts the new `REFRESH_TOKEN` using [libsodium sealed box encryption](https://doc.libsodium.org/public-key_cryptography/sealed_boxes) (via the Python script `scripts/encrypt.py`), and updates the secret in the GitHub repository using the REST API.
+
+- **Encryption:**  
+  The Python script uses [PyNaCl](https://pynacl.readthedocs.io/en/stable/) to perform the required encryption.  
+  Make sure `pynacl` is installed (`pip install pynacl`).
 
 - **Endpoint:** GitHub REST API for repository secrets.
 - **Headers:** Uses a Personal Access Token for authentication.
-- **Response:** Provides the public key needed to encrypt the new secret value.
+- **Response:** Updates the secret value in the repository.
 
 ---
 
@@ -173,45 +192,3 @@ Each `curl` command is essential for securely automating the data flow between y
 
 - Secrets are never exposed in logs or code.
 - GitHub Actions does **not** expose secrets to workflows triggered by pull requests from forks.
-
-## Limitations
-
-- The refresh token is valid for approximately 4000 hours (~5.5 months).  
-  After this period, you will need to obtain a new refresh token.
-
-This will be fixed in the future by implementing the following refresh token rotation mechanism.
-The script will automatically update the GitHub secret `REFRESH_TOKEN` with the new refresh token obtained from the VW Group API, ensuring that the script continues to function without manual intervention.
-
-```bash
-# filepath: [main.sh](http://_vscodecontentref_/0)
-# ...existing code...
-
-# Extract new refresh_token if present in the response
-new_refresh_token=$(echo "$response" | jq -r '.refresh_token')
-
-if [ "$new_refresh_token" != "null" ] && [ -n "$GH_PAT" ]; then
-  echo "Updating GitHub secret REFRESH_TOKEN..."
-
-  # Get repo info (set these as env vars or hardcode)
-  REPO_OWNER="felixlindgren"
-  REPO_NAME="cupra-tibber"
-
-  # Get public key for secrets
-  pubkey_response=$(curl -s -H "Authorization: token $GH_PAT" \
-    "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/public-key")
-
-  key_id=$(echo "$pubkey_response" | jq -r '.key_id')
-  public_key=$(echo "$pubkey_response" | jq -r '.key')
-
-  # Encrypt the new refresh token
-  encrypted_value=$(echo -n "$new_refresh_token" | \
-    openssl rsautl -encrypt -pubin -inkey <(echo "$public_key" | base64 -d) | base64 | tr -d '\n')
-
-  # Update the secret
-  curl -s -X PUT -H "Authorization: token $GH_PAT" \
-    -H "Content-Type: application/json" \
-    -d "{\"encrypted_value\":\"$encrypted_value\",\"key_id\":\"$key_id\"}" \
-    "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/REFRESH_TOKEN"
-fi
-# ...existing code...
-```
