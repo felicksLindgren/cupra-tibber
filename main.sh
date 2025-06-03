@@ -83,7 +83,7 @@ put_response=$(curl -s -L -X PUT \
   "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/REFRESH_TOKEN" \
   -d "{ \"encrypted_value\": \"$encrypted_value\", \"key_id\": \"$key_id\" }")
 
-if [ "$(echo "$put_response" | jq -r '.message')" == "null" ]; then
+if [ -z $put_response || -z $(echo "$put_response" | jq -r '.message') ]; then
   echo "Refresh token updated successfully in GitHub repository."
 else
   echo "Failed to update refresh token in GitHub repository. Response: $put_response"
