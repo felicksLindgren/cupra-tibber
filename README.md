@@ -13,7 +13,7 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
   - [2. Fetch State of Charge from Cupra API](#2-fetch-state-of-charge-from-cupra-api)
   - [3. Authenticate with Tibber](#3-authenticate-with-tibber)
   - [4. Update Battery Level in Tibber](#4-update-battery-level-in-tibber)
-  - [5. (Planned) Update the GitHub Secret `REFRESH_TOKEN`](#5-update-the-github-secret-refresh_token)
+  - [5. Update the GitHub Secret `REFRESH_TOKEN`](#5-update-the-github-secret-refresh_token)
 - [Obtaining a Refresh Token](#obtaining-a-refresh-token)
 - [Security](#security)
 
