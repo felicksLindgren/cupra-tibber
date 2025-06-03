@@ -14,7 +14,7 @@ if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$TOKEN_ENDPOINT" ] ||
 fi
 
 # --- Request a new access token using the refresh token ---
-token_response=$(curl -s -X POST "$TOKEN_ENDPOINT" \
+token_response=$(curl -s -X POST https://identity.vwgroup.io/oidc/v1/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=refresh_token" \
   -d "client_id=$CLIENT_ID" \
