@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 from base64 import b64encode
 from nacl import encoding, public

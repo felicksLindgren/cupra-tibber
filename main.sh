@@ -58,7 +58,7 @@ pubkey_response=$(curl -L \
 key_id=$(echo "$pubkey_response" | jq -r '.key_id')
 public_key=$(echo "$pubkey_response" | jq -r '.key')
 
-encrypted_value=$(python3 scripts/encrypt.py "$public_key" "$new_refresh_token")
+encrypted_value=$((python3 scripts/encrypt.py "$public_key" "$new_refresh_token") 2>/dev/null)
 
 if [ "$encrypted_value" == "null" ]; then
   echo "Failed to encrypt the refresh token."
@@ -73,9 +73,6 @@ if [ "$key_id" == "null" ] || [ "$public_key" == "null" ]; then
 else
   echo "Public key retrieved successfully."
 fi
-
-encrypted_value=$(echo -n "$new_refresh_token" | \
-  openssl)
 
 # Fetch state of charge from Cupra API
 state_of_charge=$(curl -s https://ola.prod.code.seat.cloud.vwgroup.com/v1/vehicles/$VIN/charging/status \
