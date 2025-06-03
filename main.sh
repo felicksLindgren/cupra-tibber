@@ -8,7 +8,7 @@ HOME_ID="3d7d05f5-d547-4db2-9499-0188825a7cfc"
 VEHICLE_ID="3901c6b5-76de-4e1c-90b3-1cfcbcbf5fef"
 
 # --- Check required environment variables ---
-if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$TOKEN_ENDPOINT" ] || [ -z "$REFRESH_TOKEN" ] || [ -z "$TIBBER_EMAIL" ] || [ -z "$TIBBER_PASSWORD" ]; then
+if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$REFRESH_TOKEN" ] || [ -z "$TIBBER_EMAIL" ] || [ -z "$TIBBER_PASSWORD" ]; then
   echo "One or more required environment variables are not set."
   exit 1
 fi
