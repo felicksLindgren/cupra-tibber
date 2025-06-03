@@ -42,6 +42,109 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
 
 3. **Workflow runs automatically** every hour and on relevant file changes.
 
+## Curl Requests Explained
+
+The `main.sh` script uses several `curl` commands to interact with external APIs. Here’s a detailed explanation of each:
+
+### 1. Obtain a New VW Group Access Token
+
+```bash
+response=$(curl -s -X POST "$TOKEN_ENDPOINT" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=refresh_token" \
+  -d "client_id=$CLIENT_ID" \
+  -d "client_secret=$CLIENT_SECRET" \
+  -d "refresh_token=$REFRESH_TOKEN")
+```
+
+**Purpose:**  
+This request exchanges your long-lived `refresh_token` for a new, short-lived access token from the VW Group OAuth2 server.
+
+- **Endpoint:** The VW Group OAuth2 token endpoint.
+- **Headers:** Sets the content type for form data.
+- **Data:** Supplies the client credentials and refresh token.
+- **Response:** Contains a new access token (and possibly a new refresh token).
+
+---
+
+### 2. Fetch State of Charge from Cupra API
+
+```bash
+state_of_charge=$(curl -s https://ola.prod.code.seat.cloud.vwgroup.com/v1/vehicles/$VIN/charging/status \
+  -H "authorization: Bearer $vw_access_token" | jq -r '.battery.currentSocPercentage')
+```
+
+**Purpose:**  
+Retrieves the current battery state of charge (SoC) for your Cupra vehicle.
+
+- **Endpoint:** The Cupra vehicle status API.
+- **Headers:** Uses the access token from the previous step for authorization.
+- **Response:** Returns the current SoC as a percentage.
+
+---
+
+### 3. Authenticate with Tibber
+
+```bash
+tibber_access_token=$(curl -s -X POST https://app.tibber.com/login.credentials \
+  --header 'content-type: application/json' \
+  --data '{
+    "email": "'"$TIBBER_EMAIL"'",
+    "password": "'"$TIBBER_PASSWORD"'"
+  }' | jq -r '.token')
+```
+
+**Purpose:**  
+Logs in to Tibber using your credentials to obtain an access token for further API requests.
+
+- **Endpoint:** Tibber login endpoint.
+- **Headers:** Sets content type to JSON.
+- **Data:** Supplies your Tibber email and password.
+- **Response:** Returns a Tibber access token.
+
+---
+
+### 4. Update Battery Level in Tibber
+
+```bash
+curl -s -X POST https://app.tibber.com/v4/gql \
+  -H "authorization: Bearer $tibber_access_token" \
+  -H "content-type: application/json" \
+  --data "{
+    \"query\": \"mutation setVehicleSettings { me { setVehicleSettings(id: \\\"$VEHICLE_ID\\\", homeId: \\\"$HOME_ID\\\", settings: [{ key: \\\"offline.vehicle.batteryLevel\\\", value: $state_of_charge }] ) { id } } }\"
+  }"
+```
+
+**Purpose:**  
+Sends the latest state of charge to Tibber using a GraphQL mutation.
+
+- **Endpoint:** Tibber GraphQL API.
+- **Headers:** Uses the Tibber access token for authorization and sets content type to JSON.
+- **Data:** Sends a mutation to update the vehicle’s battery level.
+- **Response:** Confirms the update.
+
+---
+
+### 5. (Planned) Update the GitHub Secret `REFRESH_TOKEN`
+
+```bash
+# Get public key for secrets
+pubkey_response=$(curl -s -H "Authorization: token $GH_PAT" \
+  "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/public-key")
+# ... (encryption and update steps follow)
+```
+
+**Purpose:**  
+Fetches the repository’s public key to encrypt and update the `REFRESH_TOKEN` secret via the GitHub API.
+
+- **Endpoint:** GitHub REST API for repository secrets.
+- **Headers:** Uses a Personal Access Token for authentication.
+- **Response:** Provides the public key needed to encrypt the new secret value.
+
+---
+
+Each `curl` command is essential for securely automating the data flow between your Cupra vehicle, Tibber, and GitHub Actions.
+
 ## Obtaining a Refresh Token
 
 - The easiest way to obtain a `refresh_token` is by using an API client like **Postman** or **Bruno**.  
