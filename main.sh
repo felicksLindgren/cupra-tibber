@@ -76,7 +76,7 @@ fi
 
 echo "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/REFRESH_TOKEN"
 
-put_response=$(curl -L -X PUT \
+put_response=$(curl -s -L -X PUT \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer $GH_PAT" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
