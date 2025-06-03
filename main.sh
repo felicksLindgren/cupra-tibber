@@ -76,20 +76,12 @@ fi
 
 echo "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/REFRESH_TOKEN"
 
-put_response=$(curl -s -L -X PUT \
+curl -L -X PUT \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer $GH_PAT" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/REFRESH_TOKEN" \
-  -d "{ \"encrypted_value\": \"$encrypted_value\", \"key_id\": \"$key_id\" }")
-
-# Check for "201 Created" status code
-if [ "$(echo "$put_response" | jq -r '.status')" != "201" ]; then
-  echo "Failed to update the refresh token in GitHub Secrets. Response: $put_response"
-  exit 1
-else
-  echo "Refresh token updated successfully in GitHub Secrets."
-fi
+  -d "{ \"encrypted_value\": \"$encrypted_value\", \"key_id\": \"$key_id\" }"
 
 # Fetch state of charge from Cupra API
 state_of_charge=$(curl -s https://ola.prod.code.seat.cloud.vwgroup.com/v1/vehicles/$VIN/charging/status \
