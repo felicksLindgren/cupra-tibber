@@ -48,12 +48,19 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
 
 1. **Add required secrets** to your repository:
    - `CLIENT_ID`
+     - Can be obtained from [this](https://github.com/tillsteinbach/CarConnectivity-connector-seatcupra/blob/d4e81b4eb154e022068aa5d0a045d8eb674cc634/src/carconnectivity_connectors/seatcupra/auth/my_cupra_session.py#L56) repository.
    - `CLIENT_SECRET`
+     - Can be obtained from [this](https://github.com/tillsteinbach/CarConnectivity-connector-seatcupra/blob/d4e81b4eb154e022068aa5d0a045d8eb674cc634/src/carconnectivity_connectors/seatcupra/auth/my_cupra_session.py#L136) repository.
    - `REFRESH_TOKEN`
+      - Obtain this token using an API client like Postman or Bruno (see "Obtaining a Refresh Token" section below).
    - `TIBBER_EMAIL`
+      - Your email address used for Tibber login.
    - `TIBBER_PASSWORD`
-   - `GH_PAT` (Personal Access Token with repo access)
-   - `VIN` (Your vehicle's VIN)
+      - Your password used for Tibber login.
+   - `GH_PAT`
+      - A GitHub Personal Access Token with `repo` scope to allow updating secrets.
+   - `VIN`
+      - Your Cupra vehicle's VIN (Vehicle Identification Number).
 
 2. **Modify vehicle and home IDs** in `main.sh` if needed.
 
