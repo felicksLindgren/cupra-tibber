@@ -52,6 +52,8 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
    - `CLIENT_SECRET`
      - Can be found in [this](https://github.com/tillsteinbach/CarConnectivity-connector-seatcupra/blob/d4e81b4eb154e022068aa5d0a045d8eb674cc634/src/carconnectivity_connectors/seatcupra/auth/my_cupra_session.py#L136) repository.
    - `REFRESH_TOKEN`
+      - A long-lived refresh token for the VW Group API.  
+        This is used to obtain new access tokens without needing to log in again.
       - Obtain this token using an API client like Postman or Bruno (see "Obtaining a Refresh Token" section below).
    - `TIBBER_EMAIL`
       - Your email address used for Tibber login.
