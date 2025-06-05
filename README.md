@@ -48,9 +48,9 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
 
 1. **Add required secrets** to your repository:
    - `CLIENT_ID`
-     - Can be obtained from [this](https://github.com/tillsteinbach/CarConnectivity-connector-seatcupra/blob/d4e81b4eb154e022068aa5d0a045d8eb674cc634/src/carconnectivity_connectors/seatcupra/auth/my_cupra_session.py#L56) repository.
+     - Can be found in [this](https://github.com/tillsteinbach/CarConnectivity-connector-seatcupra/blob/d4e81b4eb154e022068aa5d0a045d8eb674cc634/src/carconnectivity_connectors/seatcupra/auth/my_cupra_session.py#L56) repository.
    - `CLIENT_SECRET`
-     - Can be obtained from [this](https://github.com/tillsteinbach/CarConnectivity-connector-seatcupra/blob/d4e81b4eb154e022068aa5d0a045d8eb674cc634/src/carconnectivity_connectors/seatcupra/auth/my_cupra_session.py#L136) repository.
+     - Can be found in [this](https://github.com/tillsteinbach/CarConnectivity-connector-seatcupra/blob/d4e81b4eb154e022068aa5d0a045d8eb674cc634/src/carconnectivity_connectors/seatcupra/auth/my_cupra_session.py#L136) repository.
    - `REFRESH_TOKEN`
       - Obtain this token using an API client like Postman or Bruno (see "Obtaining a Refresh Token" section below).
    - `TIBBER_EMAIL`
