@@ -52,9 +52,9 @@ github_api() {
 # --- Validate Environment Variables ---
 
 required_vars=(
-  VW_CLIENT_ID
-  VW_CLIENT_SECRET
-  VW_REFRESH_TOKEN
+  CLIENT_ID
+  CLIENT_SECRET
+  REFRESH_TOKEN
   TIBBER_EMAIL
   TIBBER_PASSWORD
   GH_PAT
