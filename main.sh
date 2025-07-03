@@ -4,7 +4,7 @@
 # fetches the vehicle state of charge, and updates Tibber accordingly.
 #
 # Required environment variables:
-#   VW_CLIENT_ID, VW_CLIENT_SECRET, VW_REFRESH_TOKEN,
+#   CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN,
 #   TIBBER_EMAIL, TIBBER_PASSWORD, GH_PAT, VIN
 #
 
@@ -71,9 +71,9 @@ get_vw_access_token() {
   curl -s -X POST "https://identity.vwgroup.io/oidc/v1/token" \
     -H "Content-Type: application/x-www-form-urlencoded" \
     -d "grant_type=refresh_token" \
-    -d "client_id=$VW_CLIENT_ID" \
-    -d "client_secret=$VW_CLIENT_SECRET" \
-    -d "refresh_token=$VW_REFRESH_TOKEN"
+    -d "client_id=$CLIENT_ID" \
+    -d "client_secret=$CLIENT_SECRET" \
+    -d "refresh_token=$REFRESH_TOKEN"
 }
 
 # --- Main Script ---
@@ -111,7 +111,7 @@ main() {
 
   log "Updating GitHub Actions secret..."
   github_api PUT \
-    "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/VW_REFRESH_TOKEN" \
+    "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/REFRESH_TOKEN" \
     "{ \"encrypted_value\": \"$encrypted_value\", \"key_id\": \"$key_id\" }" >/dev/null
 
   log "Fetching vehicle state of charge..."
