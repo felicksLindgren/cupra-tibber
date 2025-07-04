@@ -37,7 +37,7 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
 - **Purpose:**  
   Schedules the execution of `main.sh` using GitHub Actions.
 - **Triggers:**
-  - **Scheduled:** Runs automatically every hour (`cron: '0 * * * *'`).
+  - **Scheduled:** Runs automatically every 15 minutes (`cron: '*/15 * * * *'`).
   - **Push:** Runs when `main.sh` or the workflow file itself is changed.
 - **Secrets:**  
   All required secrets are injected as environment variables from the repository's GitHub Secrets.
@@ -66,7 +66,7 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
 
 2. **Modify vehicle and home IDs** in `main.sh` if needed.
 
-3. **Workflow runs automatically** every hour and on relevant file changes.
+3. **Workflow runs automatically** every 15 minutes and on relevant file changes.
 
 ## Curl Requests Explained
 
