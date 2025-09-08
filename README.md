@@ -2,11 +2,27 @@
 
 This repository contains a Bash script and a GitHub Actions workflow to automate fetching the state of charge (SoC) from a Cupra vehicle (via VW Group API) and sending it to Tibber.
 
+## Project Structure
+
+```text
+├── main.sh                          # Main automation script
+├── README.md                        # This documentation file
+├── .gitignore                       # Git ignore file
+├── .github/
+│   └── workflows/
+│       └── scheduled.yml            # GitHub Actions workflow
+└── scripts/
+    ├── encrypt.py                   # Python encryption utility
+    └── requirements.txt             # Python dependencies
+```
+
 ## Table of Contents
 
 - [Contents](#contents)
   - [main.sh](#mainsh)
   - [.github/workflows/scheduled.yml](#githubworkflowsscheduledyml)
+  - [scripts/encrypt.py](#scriptsencryptpy)
+  - [scripts/requirements.txt](#scriptsrequirementstxt)
 - [Setup](#setup)
 - [Curl Requests Explained](#curl-requests-explained)
   - [1. Obtain a New VW Group Access Token](#1-obtain-a-new-vw-group-access-token)
@@ -44,6 +60,24 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
 - **How it works:**  
   The workflow checks out the repository and runs `main.sh` in a secure environment.
 
+### `scripts/encrypt.py`
+
+- **Purpose:**  
+  A Python utility script that encrypts sensitive values using libsodium sealed box encryption for secure GitHub secrets management.
+- **Dependencies:**  
+  Requires the `pynacl` library (specified in `scripts/requirements.txt`).
+- **Usage:**  
+  Called by `main.sh` to encrypt the new refresh token before updating the GitHub repository secret.
+- **Security:**  
+  Uses public key cryptography to ensure that only GitHub can decrypt the secret values.
+
+### `scripts/requirements.txt`
+
+- **Purpose:**  
+  Specifies the Python dependencies required for the encryption script.
+- **Contents:**  
+  Currently contains `pynacl` which is used for the libsodium sealed box encryption in `scripts/encrypt.py`.
+
 ## Setup
 
 1. **Add required secrets** to your repository:
@@ -64,9 +98,15 @@ This repository contains a Bash script and a GitHub Actions workflow to automate
    - `VIN`
       - Your Cupra vehicle's VIN (Vehicle Identification Number).
 
-2. **Modify vehicle and home IDs** in `main.sh` if needed.
+2. **Install Python dependencies** (if running locally):
 
-3. **Workflow runs automatically** every 15 minutes and on relevant file changes.
+   ```bash
+   pip install -r scripts/requirements.txt
+   ```
+
+3. **Modify vehicle and home IDs** in `main.sh` if needed.
+
+4. **Workflow runs automatically** every 15 minutes and on relevant file changes.
 
 ## Curl Requests Explained
 
