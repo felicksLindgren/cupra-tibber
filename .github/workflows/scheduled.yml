@@ -1,30 +1,14 @@
-name: Scheduled Cupra Tibber Sync
+# This is a scheduled workflow
+
+name: Scheduled Workflow
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # every 15 minutes
-  push:
-    paths:
-      - main.sh
-      - .github/workflows/scheduled.yml
+    - cron: '*/30 * * * *'
 
 jobs:
-  sync:
+  example_job:
     runs-on: ubuntu-latest
-    env:
-      CLIENT_ID: ${{ secrets.CLIENT_ID }}
-      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-      REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
-      TOKEN_ENDPOINT: ${{ secrets.TOKEN_ENDPOINT }}
-      TIBBER_EMAIL: ${{ secrets.TIBBER_EMAIL }}
-      TIBBER_PASSWORD: ${{ secrets.TIBBER_PASSWORD }}
-      VIN: ${{ secrets.VIN }}
-      GH_PAT: ${{ secrets.GH_PAT }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Install python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r scripts/requirements.txt
-      - name: Run sync script
-        run: bash main.sh
+      - name: Run a command
+        run: echo "This is a scheduled job running every 30 minutes!"
