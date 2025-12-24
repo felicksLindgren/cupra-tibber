@@ -185,7 +185,7 @@ curl -s -X POST https://app.tibber.com/v4/gql \
 ```
 
 **Purpose:**  
-Sends the latest state of charge to Tibber using a GraphQL mutation.
+Updates the state of charge in Tibber using a GraphQL mutation.
 
 - **Endpoint:** Tibber GraphQL API.
 - **Headers:** Uses the Tibber access token for authorization and sets content type to JSON.
