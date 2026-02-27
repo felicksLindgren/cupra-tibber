@@ -232,7 +232,7 @@ Fetches the repository’s public key, encrypts the new `REFRESH_TOKEN` using [l
 
 ---
 
-Each `curl` command is essential for securely automating the data flow between your Cupra vehicle, Tibber, and GitHub Actions.
+Each `curl` command is very essential for securely automating the data flow between your Cupra vehicle, Tibber, and GitHub Actions.
 
 ## Obtaining a Refresh Token
 
